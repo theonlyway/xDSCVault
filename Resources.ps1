@@ -1,11 +1,15 @@
-$Version = New-xDscResourceProperty -Name Version -Type String -Attribute Key -Description "The Vault version to download"
-$Ensure = New-xDscResourceProperty -Name Ensure -Type String -Attribute Write -ValidateSet "Present", "Absent"
+$Version = New-xDscResourceProperty -Name Version -Type String -Attribute Key -Description 'The Vault version to download'
 #Now create the resource
-New-xDscResource -Name xVaultDownload -Property $Version $Ensure -Path "C:\Users\Anthony\Documents\BitBucket\xDSCVault"
+New-xDscResource -Name xDSCVault_Download -FriendlyName VaultDownload -Property $Version -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault' -Force
+Test-xDscSchema -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault\DSCResources\xDSCVault_Download\xDSCVault_Download.schema.mof'
 
-$Method = New-xDscResourceProperty -Name Method -Type String -Attribute Key -Description "Method to perform action. CLI or API" -ValidateSet "CLI", "API"
-$WrappedToken = New-xDscResourceProperty -Name WrappedToken -Type String -Attribute Write -Description "Value of the wrapped token"
-$VaultAddress = New-xDscResourceProperty -Name VaultAddress -Type String -Attribute Write -Description "Address of the Vault server"
+
+$WrappedToken = New-xDscResourceProperty -Name WrappedToken -Attribute Key -Type String -Description 'Value of the wrapped token'
+$Method = New-xDscResourceProperty -Name VaultMethod -Attribute Required -Type String -Description 'Method to perform action. CLI or API' -ValueMap 'Api', 'Cli' -Values 'Api', 'Cli'
+$VaultAddress = New-xDscResourceProperty -Name VaultAddress -Type String -Attribute Required -Description 'Address of the Vault server'
+$cliPath = New-xDscResourceProperty -Name CliPath -Type String -Attribute Write -Description 'Path to the vault binary'
+$ApiPrefix = New-xDscResourceProperty -Name ApiPrefix -Type String -Attribute Write -Description 'Version of the API to use'
 
 #Now create the resource
-New-xDscResource -Name xVaultUnwrap -Property $Method, $WrappedToken, $VaultAddress -Path "C:\Users\Anthony\Documents\BitBucket\xDSCVault"
+New-xDscResource -Name xDSCVault_Unwrap -FriendlyName VaultUnwrap -Property $WrappedToken, $Method, $VaultAddress, $cliPath, $ApiPrefix -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault' -Force
+Test-xDscSchema -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault\DSCResources\xDSCVault_Unwrap\xDSCVault_Unwrap.schema.mof'

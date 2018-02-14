@@ -63,12 +63,12 @@ function Start-VaultAuth
   )
   $credentials = Get-StoredCredential -Target $VaultAddress
   $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/auth/approle/login')
-  $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
-  $headers.Add('role_id', $credentials.UserName)
-  $headers.Add('secret_id', [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($credentials.Password)))
+  $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+  $body.Add('role_id', $credentials.UserName)
+  $body.Add('secret_id', [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($credentials.Password)))
   try
   {
-    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($headers | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
+    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
     return $apiResult
   }
   catch
@@ -100,23 +100,97 @@ function Write-VaultData
     [Parameter(Mandatory = $true,
     Position = 2)]   
     [System.String]
+    $Value,
+
+    [Parameter(Mandatory = $true,
+    Position = 3)]   
+    [System.String]
     $ClientToken
 
   )
   $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
+
+  $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+  $headers.Add('X-Vault-Token', $ClientToken)
+
   $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
-  $body.Add('X-Vault-Token', $ClientToken)
+  $body.Add('value', $Value)
+
   try
   {
-    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
+    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -Headers $headers -ContentType application/json -ErrorAction Stop
+  }
+  catch
+  {
+    if ($_.Exception.Response.GetResponseStream() -ne $null) 
+    {
+      $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
+      if ($responseBody -match 'permission denied' ) 
+      {
+        Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
+      } 
+    }
+    else 
+    {
+      "Error was $_"
+      $line = $_.InvocationInfo.ScriptLineNumber
+      "Error was in Line $line"
+    }
+  }
+}
+
+function Read-VaultData
+{
+  [CmdletBinding()]
+  Param
+  (
+    [Parameter(Mandatory = $true,
+    Position = 0)]   
+    [System.String]
+    $VaultAddress,
+
+    [System.String]
+    $ApiPrefix = 'v1',
+
+    [Parameter(Mandatory = $true,
+    Position = 1)]   
+    [System.String]
+    $VaultPath,
+
+    [Parameter(Mandatory = $true,
+    Position = 2)]   
+    [System.String]
+    $ClientToken
+
+  )
+  $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
+
+  $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+  $headers.Add('X-Vault-Token', $ClientToken)
+
+  try
+  {
+    $apiResult = Invoke-RestMethod -Method Get -Uri $apiUri -Headers $headers -ErrorAction Stop
     return $apiResult
   }
   catch
   {
-    "Error was $_"
-    $line = $_.InvocationInfo.ScriptLineNumber
-    "Error was in Line $line"
+    if ($_.Exception.Response.GetResponseStream() -ne $null) 
+    {
+      $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
+      if ($responseBody -match 'permission denied' ) 
+      {
+        Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
+      } 
+    }
+    else 
+    {
+      "Error was $_"
+      $line = $_.InvocationInfo.ScriptLineNumber
+      "Error was in Line $line"
+    }
   }
 }
 
-Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData' )
+
+Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData' )

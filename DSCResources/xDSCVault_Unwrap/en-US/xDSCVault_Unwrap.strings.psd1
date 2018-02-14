@@ -4,4 +4,5 @@ ConvertFrom-StringData @'
     VaultTokenLookupInvalid = Wrapping token is not valid or does not exist 
     Vaultissecretwrapped = Checking to see if secret is still wrapped
     CheckingDNS = Checking DNS for '{0}'
+    AttemptUnwrap = Attempting to unwrap token
 '@

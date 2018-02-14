@@ -1,7 +1,7 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-function Read-RESTResponse
+function Read-RESTException
 {
     [CmdletBinding()]
     Param
@@ -9,10 +9,9 @@ function Read-RESTResponse
         # Param1 help description
         [Parameter(Mandatory=$true,
                    Position=0)]
-        $Response
+        $Exception
     )
 
-      $exception = $_.Exception.Response.GetResponseStream()
       $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList ($exception)
       $reader.BaseStream.Position = 0
       $reader.DiscardBufferedData()
@@ -48,4 +47,4 @@ function Get-LocalizedData
     return $localizedData
 }
 
-Export-ModuleMember -Function @( 'Read-RESTResponse', 'Get-LocalizedData' )
+Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData' )

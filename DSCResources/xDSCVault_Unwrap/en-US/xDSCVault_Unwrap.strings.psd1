@@ -1,8 +1,13 @@
 ConvertFrom-StringData @'
     VaultMethod = '{0}' selected 
     VaultDnsException = Vault address could not be resolved
-    VaultTokenLookupInvalid = Wrapping token is not valid or does not exist 
-    Vaultissecretwrapped = Checking to see if secret is still wrapped
+    VaultTokenLookupInvalid = Wrapped token has already been unwrapped, not valid or does not exist 
+    IsVaulttokenwrapped = Checking to see if secret is still wrapped
+    Vaulttokenisstillwrapped = Secret is still wrapped
     CheckingDNS = Checking DNS for '{0}'
     AttemptUnwrap = Attempting to unwrap token
+    Createstoredcred = Creating credential in credential manager
+    Deletestoredcred = Attempting to remove existing stored credential
+    Resultwrapped = wrapped
+    Resulttokenerror = tokenError
 '@

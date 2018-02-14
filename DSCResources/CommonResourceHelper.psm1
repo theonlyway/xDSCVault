@@ -52,7 +52,6 @@ function Start-VaultAuth
   [CmdletBinding()]
   Param
   (
-    # Param1 help description
     [Parameter(Mandatory = $true,
     Position = 0)]   
     [System.String]
@@ -80,5 +79,44 @@ function Start-VaultAuth
   }
 }
 
+function Write-VaultData
+{
+  [CmdletBinding()]
+  Param
+  (
+    [Parameter(Mandatory = $true,
+    Position = 0)]   
+    [System.String]
+    $VaultAddress,
+
+    [System.String]
+    $ApiPrefix = 'v1',
+
+    [Parameter(Mandatory = $true,
+    Position = 1)]   
+    [System.String]
+    $VaultPath,
+
+    [Parameter(Mandatory = $true,
+    Position = 2)]   
+    [System.String]
+    $ClientToken
+
+  )
+  $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
+  $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+  $body.Add('X-Vault-Token', $ClientToken)
+  try
+  {
+    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
+    return $apiResult
+  }
+  catch
+  {
+    "Error was $_"
+    $line = $_.InvocationInfo.ScriptLineNumber
+    "Error was in Line $line"
+  }
+}
 
 Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData' )

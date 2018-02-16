@@ -175,8 +175,13 @@ function Read-VaultData
   }
   catch
   {
-    if ($_.Exception.Response.GetResponseStream() -ne $null) 
+    if ($_.Exception.response.StatusCode.value__ -eq '404') 
     {
+      Write-Verbose -Message "Returned 404. No value found at $VaultPath"
+    }
+    elseif ($_.Exception.Response.GetResponseStream() -ne $null) 
+    {
+      $blah = $_.Exception 
       $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
       if ($responseBody -match 'permission denied' ) 
       {

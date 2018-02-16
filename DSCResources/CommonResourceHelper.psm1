@@ -178,6 +178,8 @@ function Read-VaultData
     if ($_.Exception.response.StatusCode.value__ -eq '404') 
     {
       Write-Verbose -Message "Returned 404. No value found at $VaultPath"
+      $apiResult = 404
+      return $apiResult
     }
     elseif ($_.Exception.Response.GetResponseStream() -ne $null) 
     {
@@ -198,4 +200,4 @@ function Read-VaultData
 }
 
 
-Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData' )
+Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData', 'Start-VaultAuth' )

@@ -178,15 +178,22 @@ function Read-VaultData
     if ($_.Exception.response.StatusCode.value__ -eq '404') 
     {
       Write-Verbose -Message "Returned 404. No value found at $VaultPath"
+      $apiResult = 404
+      return $apiResult
     }
     elseif ($_.Exception.Response.GetResponseStream() -ne $null) 
     {
-      $blah = $_.Exception 
       $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
       if ($responseBody -match 'permission denied' ) 
       {
         Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
       } 
+      else 
+      {
+        "Error was $_"
+        $line = $_.InvocationInfo.ScriptLineNumber
+        "Error was in Line $line"      
+      }
     }
     else 
     {
@@ -198,4 +205,4 @@ function Read-VaultData
 }
 
 
-Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData' )
+Export-ModuleMember -Function @( 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData', 'Start-VaultAuth' )

@@ -39,7 +39,6 @@ $PasswordChangeRequired = New-xDscResourceProperty -Name PasswordChangeRequired 
 $PasswordNeverExpires = New-xDscResourceProperty -Name PasswordNeverExpires -Type Boolean -Attribute Required -Description 'Indicates if the password will expire'
 $VaultPath = New-xDscResourceProperty -Name VaultPath -Type String -Attribute Key -Description 'Vault path to create the secret'
 $VaultAddress = New-xDscResourceProperty -Name VaultAddress -Type String -Attribute Required -Description 'Address of the Vault server'
-$VaultValue = New-xDscResourceProperty -Name VaultValue -Type String -Attribute Write -Description 'Value for the secret'
 $Method = New-xDscResourceProperty -Name VaultMethod -Attribute Required -Type String -Description 'Method to perform action. CLI or API' -ValueMap 'Api', 'Cli' -Values 'Api', 'Cli'
 $ApiPrefix = New-xDscResourceProperty -Name ApiPrefix -Type String -Attribute Write -Description 'Version of the API to use'
 $ApiPath = New-xDscResourceProperty -Name ApiPath -Type String -Attribute Read -Description 'Complete API path'
@@ -47,6 +46,6 @@ $cliPath = New-xDscResourceProperty -Name CliPath -Type String -Attribute Write 
 
 
 #Now create the resource
-New-xDscResource -Name xDSCVault_LocalUser -FriendlyName VaultLocalUser -Property $Method, $VaultAddress, $VaultPath, $VaultValue, $cliPath, $ApiPrefix, $ApiPath, `
+New-xDscResource -Name xDSCVault_LocalUser -FriendlyName VaultLocalUser -Property $Method, $VaultAddress, $VaultPath, $cliPath, $ApiPrefix, $ApiPath, `
     $UserName, $Description, $Disabled, $Ensure, $FullName, $PasswordChangeNotAllowed, $PasswordChangeRequired, $PasswordNeverExpires -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault' -Force
 Test-xDscSchema -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault\DSCResources\xDSCVault_LocalUser\xDSCVault_LocalUser.schema.mof'

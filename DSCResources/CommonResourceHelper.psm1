@@ -118,6 +118,7 @@ function Write-VaultData
 
   try
   {
+    Write-Verbose -Message 'Attempting to write secret'
     $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -Headers $headers -ContentType application/json -ErrorAction Stop
   }
   catch

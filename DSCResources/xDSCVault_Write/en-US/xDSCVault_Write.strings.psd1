@@ -12,4 +12,5 @@ ConvertFrom-StringData @'
     VaultValueTruewithRandomSecretTrue = VaultValue true and RandomSecret true. Use one or the other
     VaultValueFalsewithRandomSecretFalse = VaultValue false and RandomSecret false. Pick one
     VaultValueTruewithRandomSecretFalse = VaultValue true and RandomSecret false
+    AllValuesEmptywithRandomSecretTrueNoForce = All values are empty with random secret true with no force
 '@

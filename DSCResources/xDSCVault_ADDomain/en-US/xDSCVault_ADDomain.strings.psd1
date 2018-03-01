@@ -1,16 +1,22 @@
 ConvertFrom-StringData @'
-    ObtainClientToken = Obtaining client token
-    RetrieveCurrentCalue = Retrieving current value for {0}
-    VaultValueMatchesSupplied = Value supplied matches what is currently already in Vault for {0}
-    VaultValueDoesNotMatchSupplied = Value supplied does not match what is currently already in Vault for {0}
-    Returned404 = Returned 404. No value found at {0}
-    UnknownError = Unknown error
-    VaultMethod = {0} selected
-    ValueEmptywithRandomSecretTrue = Vault value is empty and random password flag is true
-    ValueEmptywithRandomSecretTrueWithForce = Random secret with force update
-    ValueEmptywithRandomSecretTrueNoForce = Random secret without force update and current value exists
-    VaultValueTruewithRandomSecretTrue = VaultValue true and RandomSecret true. Use one or the other
-    VaultValueFalsewithRandomSecretFalse = VaultValue false and RandomSecret false. Pick one
-    VaultValueTruewithRandomSecretFalse = VaultValue true and RandomSecret false
-    AllValuesEmptywithRandomSecretTrueNoForce = All values are empty with random secret true with no force
+    ObtainClientToken                    = Obtaining client token
+    RetrieveCurrentCalue                 = Retrieving current value for {0}
+    RoleNotFoundError                    = Please ensure that the PowerShell module for role '{0}' is installed.
+    InvalidDomainError                   = Computer is a member of the wrong domain?!
+    ExistingDomainMemberError            = Computer is already a domain member. Cannot create a new '{0}' domain?
+    InvalidCredentialError               = Domain '{0}' is available, but invalid credentials were supplied.                                       
+    QueryDomainWithLocalCredential       = Computer is a domain member; querying domain '{0}' using local credential ...
+    QueryDomainWithCredential            = Computer is a workgroup member; querying for domain '{0}' using supplied credential ...
+    DomainFound                          = Active Directory domain '{0}' found.
+    DomainNotFound                       = Active Directory domain '{0}' cannot be found.
+    CreatingChildDomain                  = Creating domain '{0}' as a child of domain '{1}' ...
+    CreatedChildDomain                   = Child domain '{0}' created.
+    CreatingForest                       = Creating AD forest '{0}' ...
+    CreatedForest                        = AD forest '{0}' created.
+    ResourcePropertyValueIncorrect       = Property '{0}' value is incorrect; expected '{1}', actual '{2}'.
+    ResourceInDesiredState               = Resource '{0}' is in the desired state.
+    ResourceNotInDesiredState            = Resource '{0}' is NOT in the desired state.
+    RetryingGetADDomain                  = Attempt {0} of {1} to call Get-ADDomain failed, retrying in {2} seconds.
+    UnhandledError                       = Unhandled error occured, detail here: {0}
+    FaultExceptionAndDomainShouldExist   = ServiceModel FaultException detected and domain should exist, performing retry...
 '@

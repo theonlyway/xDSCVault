@@ -50,19 +50,24 @@ New-xDscResource -Name xDSCVault_LocalUser -FriendlyName VaultLocalUser -Propert
 $UserName, $Description, $Disabled, $Ensure, $FullName, $PasswordChangeNotAllowed, $PasswordChangeRequired, $PasswordNeverExpires -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault' -Force
 Test-xDscSchema -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault\DSCResources\xDSCVault_LocalUser\xDSCVault_LocalUser.schema.mof'
 
-$VaultPath = New-xDscResourceProperty -Name VaultPath -Type String -Attribute Key -Description 'Vault path to create the secret'
 $VaultAddress = New-xDscResourceProperty -Name VaultAddress -Type String -Attribute Required -Description 'Address of the Vault server'
 $Method = New-xDscResourceProperty -Name VaultMethod -Attribute Required -Type String -Description 'Method to perform action. CLI or API' -ValueMap 'Api', 'Cli' -Values 'Api', 'Cli'
 $ApiPrefix = New-xDscResourceProperty -Name ApiPrefix -Type String -Attribute Write -Description 'Version of the API to use'
 $ApiPath = New-xDscResourceProperty -Name ApiPath -Type String -Attribute Read -Description 'Complete API path'
 $cliPath = New-xDscResourceProperty -Name CliPath -Type String -Attribute Write -Description 'Path to the vault binary'
-$DomainName = New-xDscResourceProperty -Name DomainName -Type String -Attribute Write -Description 'Name of the domain'
+$DomainName = New-xDscResourceProperty -Name DomainName -Type String -Attribute Key -Description 'Name of the domain'
 $ParentDomainName = New-xDscResourceProperty -Name ParentDomainName -Type String -Attribute Write -Description 'Fully qualified name of the parent domain'
 $DomainNetBIOSName = New-xDscResourceProperty -Name DomainNetBIOSName -Type String -Attribute Write -Description 'Specifies the NetBIOS name for the new domain'
 $DatabasePath = New-xDscResourceProperty -Name DatabasePath -Type String -Attribute Write -Description 'Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database'
 $LogPath = New-xDscResourceProperty -Name LogPath -Type String -Attribute Write -Description 'Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written'
 $SysvolPath = New-xDscResourceProperty -Name SysvolPath -Type String -Attribute Write -Description 'Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written'
+$DnsDelegationUserName = New-xDscResourceProperty -Name DnsDelegationUserName -Type String -Attribute Write -Description 'Username to for DNS delegation'
+$DnsDelegationVaultPath = New-xDscResourceProperty -Name DnsDelegationVaultPath -Type String -Attribute Write -Description 'Vault path to get the secret'
+$SafemodeAdministratorPasswordVaultPath = New-xDscResourceProperty -Name SafemodeAdministratorPasswordVaultPath -Type String -Attribute Required -Description 'Vault path to get the secret'
+$DomainAdministratorUsername = New-xDscResourceProperty -Name DomainAdministratorUsername -Type String -Attribute Required -Description 'Domain Administrator username'
+$DomainAdministratorVaultPath = New-xDscResourceProperty -Name DomainAdministratorVaultPath -Type String -Attribute Required -Description 'Vault path to get the secret'
 
-New-xDscResource -Name xDSCVault_ADDomain -FriendlyName VaultADDomain -Property $Method, $VaultAddress, $VaultPath, $cliPath, $ApiPrefix, $ApiPath, `
-$DomainName, $ParentDomainName, $DomainNetBIOSName, $DatabasePath, $LogPath, $SysvolPath -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault' -Force
+New-xDscResource -Name xDSCVault_ADDomain -FriendlyName VaultADDomain -Property $Method, $VaultAddress, $cliPath, $ApiPrefix, $ApiPath, `
+$DomainName, $ParentDomainName, $DomainNetBIOSName, $DatabasePath, $LogPath, $SysvolPath, $DnsDelegationUserName, $DnsDelegationVaultPath, $SafemodeAdministratorPasswordVaultPath, `
+$DomainAdministratorUsername, $DomainAdministratorVaultPath -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault' -Force
 Test-xDscSchema -Path 'C:\Users\Anthony\Documents\BitBucket\xDSCVault\DSCResources\xDSCVault_ADDomain\xDSCVault_ADDomain.schema.mof'

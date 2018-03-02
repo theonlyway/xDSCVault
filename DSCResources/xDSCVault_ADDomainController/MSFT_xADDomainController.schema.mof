@@ -1,5 +1,5 @@
-[ClassVersion("1.0.1.0"), FriendlyName("xADDomainController")]
-class MSFT_xADDomainController : OMI_BaseResource
+[ClassVersion("1.0.1.0"), FriendlyName("VaultADDomainController")]
+class xDSCVault_ADDomainController : OMI_BaseResource
 {
     [Key] String DomainName;
     [Required, EmbeddedInstance("MSFT_Credential")] String DomainAdministratorCredential;

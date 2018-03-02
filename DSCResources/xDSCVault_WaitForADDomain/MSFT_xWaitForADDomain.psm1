@@ -1,4 +1,12 @@
-﻿function Get-TargetResource
+﻿# User name and password needed for this resource and Write-Verbose Used in helper functions
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
     param
@@ -16,9 +24,9 @@
 
     )
 
-    if($DomainUserCredential)
+    if ($DomainUserCredential)
     {
-        $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Property @{Username=[string]$DomainUserCredential.UserName; Password=[string]$null} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+        $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Property @{Username = [string]$DomainUserCredential.UserName; Password = [string]$null} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
     }
     else
     {
@@ -29,11 +37,11 @@
          
    
     $returnValue = @{
-        DomainName = $domain.Name
+        DomainName           = $domain.Name
         DomainUserCredential = $convertToCimCredential
-        RetryIntervalSec = $RetryIntervalSec
-        RetryCount = $RetryCount
-        RebootRetryCount = $RebootRetryCount
+        RetryIntervalSec     = $RetryIntervalSec
+        RetryCount           = $RetryCount
+        RebootRetryCount     = $RebootRetryCount
     }
     
     $returnValue
@@ -59,13 +67,13 @@ function Set-TargetResource
 
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
     
-    for($count = 0; $count -lt $RetryCount; $count++)
+    for ($count = 0; $count -lt $RetryCount; $count++)
     {
         $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
          
-        if($domain)
+        if ($domain)
         {
-            if($RebootRetryCount -gt 0)
+            if ($RebootRetryCount -gt 0)
             {
                 Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
             }
@@ -80,13 +88,13 @@ function Set-TargetResource
         }    
     }
 
-    if(-not $domain) 
+    if (-not $domain) 
     {
-        if($RebootRetryCount -gt 0)
+        if ($RebootRetryCount -gt 0)
         {
             [UInt32]$rebootCount = Get-Content $RebootLogFile -ErrorAction SilentlyContinue
             
-            if($rebootCount -lt $RebootRetryCount)
+            if ($rebootCount -lt $RebootRetryCount)
             {
                 $rebootCount = $rebootCount + 1
                 Write-Verbose -Message  "Domain $DomainName not found after $count attempts with $RetryIntervalSec sec interval. Rebooting.  Reboot attempt number $rebootCount of $RebootRetryCount."
@@ -129,9 +137,9 @@ function Test-TargetResource
     
     $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
    
-    if($domain)
+    if ($domain)
     {
-        if($RebootRetryCount -gt 0)
+        if ($RebootRetryCount -gt 0)
         {
             Remove-Item $rebootLogFile -ErrorAction SilentlyContinue
         }
@@ -159,13 +167,13 @@ function Get-Domain
     )
     Write-Verbose -Message "Checking for domain $DomainName ..."
   
-    if($DomainUserCredential)
+    if ($DomainUserCredential)
     {
         $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain', $DomainName, $DomainUserCredential.UserName, $DomainUserCredential.GetNetworkCredential().Password)
     }
     else
     {
-        $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain',$DomainName)
+        $context = new-object System.DirectoryServices.ActiveDirectory.DirectoryContext('Domain', $DomainName)
     }
     
     try 
@@ -176,7 +184,7 @@ function Get-Domain
             Name = $domain
         }
     
-       $returnValue
+        $returnValue
     }
     catch
     {

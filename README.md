@@ -36,3 +36,7 @@ List of processes that I want to get working
 - Service accounts
 - SQL clusters
 - Octopus Deploy step template
+
+## Resources
+
+I'll doco the resources with the parameters when I get a chance

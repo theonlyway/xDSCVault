@@ -3,19 +3,38 @@
 # Directory.
 #
 
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) `
+        -ChildPath 'CommonResourceHelper.psm1')
+        
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
     param
     (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $VaultAddress,
+
+        [System.String]
+        $ApiPrefix,
+
         [Parameter(Mandatory)]
         [String]$DomainName,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainAdministratorUsername,
+    
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainAdministratorVaultPath,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SafemodeAdministratorPasswordVaultPath,
 
         [String]$DatabasePath,
 
@@ -28,8 +47,13 @@ function Get-TargetResource
 
     $returnValue = @{
         DomainName = $DomainName
-        Ensure = $false
+        Ensure     = $false
     }
+
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainAdministratorVaultPath -ApiPrefix $ApiPrefix
+    $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+    $DomainAdministratorCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
 
     try
     {
@@ -46,27 +70,33 @@ function Get-TargetResource
                 {
                     Write-Verbose -Message "Current node '$($dc.Name)' is already a domain controller for domain '$($dc.Domain)'."
 
-                    $serviceNTDS     = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
+                    $serviceNTDS = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters'
                     $serviceNETLOGON = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters'
 
-                    $returnValue.Ensure       = $true
+                    $returnValue.Ensure = $true
                     $returnValue.DatabasePath = $serviceNTDS.'DSA Working Directory'
-                    $returnValue.LogPath      = $serviceNTDS.'Database log files path'
-                    $returnValue.SysvolPath   = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
-                    $returnValue.SiteName     = $dc.Site
+                    $returnValue.LogPath = $serviceNTDS.'Database log files path'
+                    $returnValue.SysvolPath = $serviceNETLOGON.SysVol -replace '\\sysvol$', ''
+                    $returnValue.SiteName = $dc.Site
                 }
             }
             catch
             {
-                if ($error[0]) {Write-Verbose $error[0].Exception}
-                Write-Verbose -Message "Current node does not host a domain controller."
+                if ($error[0]) 
+                {
+                    Write-Verbose -Message $error[0].Exception
+                }
+                Write-Verbose -Message 'Current node does not host a domain controller.'
             }
         }
     }
     catch [System.Management.Automation.CommandNotFoundException]
     {
-        if ($error[0]) {Write-Verbose $error[0].Exception}
-        Write-Verbose -Message "Current node is not running AD WS, and hence is not a domain controller."
+        if ($error[0]) 
+        {
+            Write-Verbose -Message $error[0].Exception
+        }
+        Write-Verbose -Message 'Current node is not running AD WS, and hence is not a domain controller.'
     }
     $returnValue
 }
@@ -75,14 +105,27 @@ function Set-TargetResource
 {
     param
     (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $VaultAddress,
+
+        [System.String]
+        $ApiPrefix,
+
         [Parameter(Mandatory)]
         [String]$DomainName,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainAdministratorUsername,
+    
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainAdministratorVaultPath,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SafemodeAdministratorPasswordVaultPath,
 
         [String]$DatabasePath,
 
@@ -94,47 +137,60 @@ function Set-TargetResource
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
-    $parameters = $PSBoundParameters.Remove("Debug");
+    $parameters = $PSBoundParameters.Remove('Debug')
     $targetResource = Get-TargetResource @PSBoundParameters
+
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainAdministratorVaultPath -ApiPrefix $ApiPrefix
+    $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+    $DomainAdministratorCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
+
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $SafemodeAdministratorPasswordVaultPath -ApiPrefix $ApiPrefix
+    $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+    $SafemodeAdministratorPassword = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ('SafeModePlaceHolderUser', $VaultValue)
 
     if ($targetResource.Ensure -eq $false)
     {
         ## Node is not a domain controllr so we promote it
         Write-Verbose -Message "Checking if domain '$($DomainName)' is present ..."
-        $domain = $null;
+        $domain = $null
         try
         {
             $domain = Get-ADDomain -Identity $DomainName -Credential $DomainAdministratorCredential
         }
         catch
         {
-            if ($error[0]) {Write-Verbose $error[0].Exception}
+            if ($error[0]) 
+            {
+                Write-Verbose $error[0].Exception
+            }
             throw (New-Object -TypeName System.InvalidOperationException -ArgumentList "Domain '$($DomainName)' could not be found.")
         }
 
         Write-Verbose -Message "Verified that domain '$($DomainName)' is present, continuing ..."
         $params = @{
-            DomainName = $DomainName
+            DomainName                    = $DomainName
             SafeModeAdministratorPassword = $SafemodeAdministratorPassword.Password
-            Credential = $DomainAdministratorCredential
-            NoRebootOnCompletion = $true
-            Force = $true
+            Credential                    = $DomainAdministratorCredential
+            NoRebootOnCompletion          = $true
+            Force                         = $true
         }
         if ($DatabasePath -ne $null)
         {
-            $params.Add("DatabasePath", $DatabasePath)
+            $params.Add('DatabasePath', $DatabasePath)
         }
         if ($LogPath -ne $null)
         {
-            $params.Add("LogPath", $LogPath)
+            $params.Add('LogPath', $LogPath)
         }
         if ($SysvolPath -ne $null)
         {
-            $params.Add("SysvolPath", $SysvolPath)
+            $params.Add('SysvolPath', $SysvolPath)
         }
-        if ($SiteName -ne $null -and $SiteName -ne "")
+        if ($SiteName -ne $null -and $SiteName -ne '')
         {
-            $params.Add("SiteName", $SiteName)
+            $params.Add('SiteName', $SiteName)
         }
 
         Install-ADDSDomainController @params
@@ -147,7 +203,7 @@ function Set-TargetResource
     elseif ($targetResource.Ensure)
     {
         ## Node is a domain controller. We check if other properties are in desired state
-        if ($PSBoundParameters["SiteName"] -and $targetResource.SiteName -ne $SiteName)
+        if ($PSBoundParameters['SiteName'] -and $targetResource.SiteName -ne $SiteName)
         {
             ## DC is not in correct site. Move it.
             Write-Verbose "Moving Domain Controller from '$($targetResource.SiteName)' to '$SiteName'"
@@ -161,14 +217,27 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $VaultAddress,
+
+        [System.String]
+        $ApiPrefix,
+
         [Parameter(Mandatory)]
         [String]$DomainName,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$DomainAdministratorCredential,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainAdministratorUsername,
+    
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $DomainAdministratorVaultPath,
 
-        [Parameter(Mandatory)]
-        [PSCredential]$SafemodeAdministratorPassword,
+        [parameter(Mandatory = $true)]
+        [System.String]
+        $SafemodeAdministratorPasswordVaultPath,
 
         [String]$DatabasePath,
 
@@ -178,6 +247,11 @@ function Test-TargetResource
 
         [String]$SiteName
     )
+
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainAdministratorVaultPath -ApiPrefix $ApiPrefix
+    $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+    $DomainAdministratorCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
 
     if ($PSBoundParameters.SiteName)
     {
@@ -191,7 +265,7 @@ function Test-TargetResource
 
     try
     {
-        $parameters = $PSBoundParameters.Remove("Debug");
+        $parameters = $PSBoundParameters.Remove('Debug')
 
         $existingResource = Get-TargetResource @PSBoundParameters
         $isCompliant = $existingResource.Ensure
@@ -208,13 +282,15 @@ function Test-TargetResource
     }
     catch
     {
-        if ($error[0]) {Write-Verbose $error[0].Exception}
+        if ($error[0]) 
+        {
+            Write-Verbose $error[0].Exception
+        }
         Write-Verbose -Message "Domain '$($DomainName)' is NOT present on the current node."
         $isCompliant = $false
     }
 
     $isCompliant
-
 }
 
 ## Import the common AD functions

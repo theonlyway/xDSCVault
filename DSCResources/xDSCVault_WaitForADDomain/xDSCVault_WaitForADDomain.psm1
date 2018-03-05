@@ -36,8 +36,8 @@ function Get-TargetResource
 
     if ($DomainUserVaultPath)
     {
-        $clientToken = Start-VaultAuth -VaultAddress $VaultAddress
-        $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath
+        $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+        $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath -ApiPrefix $ApiPrefix
         $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
         $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     }
@@ -90,8 +90,8 @@ function Set-TargetResource
 
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
 
-    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress
-    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
     $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     
@@ -172,8 +172,8 @@ function Test-TargetResource
     
     $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
 
-    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress
-    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
     $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     

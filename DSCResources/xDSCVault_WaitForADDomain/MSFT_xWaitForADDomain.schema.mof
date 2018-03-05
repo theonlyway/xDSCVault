@@ -1,6 +1,9 @@
 [ClassVersion("1.0.1.0"), FriendlyName("VaultWaitForADDomain")]
 class xDSCVault_WaitForADDomain : OMI_BaseResource
 {
+    [Required, Description("Address of the Vault server")] String VaultAddress;
+    [Write, Description("Version of the API to use")] String ApiPrefix;
+    [Read, Description("Complete API path")] String ApiPath;    
     [Key] String DomainName;
     [Write, EmbeddedInstance("MSFT_Credential")] String DomainUserCredential;
     [Write] uint64 RetryIntervalSec;

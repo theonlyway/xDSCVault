@@ -1,5 +1,4 @@
 ConvertFrom-StringData @'
-    VaultMethod = {0} selected 
     VaultDnsException = Vault address could not be resolved
     VaultTokenLookupInvalid = Wrapped token has already been unwrapped, not valid or does not exist 
     IsVaulttokenwrapped = Checking to see if secret is still wrapped

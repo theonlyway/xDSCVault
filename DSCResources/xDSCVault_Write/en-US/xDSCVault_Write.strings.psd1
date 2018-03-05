@@ -5,7 +5,6 @@ ConvertFrom-StringData @'
     VaultValueDoesNotMatchSupplied = Value supplied does not match what is currently already in Vault for {0}
     Returned404 = Returned 404. No value found at {0}
     UnknownError = Unknown error
-    VaultMethod = {0} selected
     ValueEmptywithRandomSecretTrue = Vault value is empty and random password flag is true
     ValueEmptywithRandomSecretTrueWithForce = Random secret with force update
     ValueEmptywithRandomSecretTrueNoForce = Random secret without force update and current value exists

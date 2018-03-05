@@ -14,11 +14,15 @@ function Get-TargetResource
     [Parameter(Mandatory)]
     [String]$DomainName,
 
+    [parameter(Mandatory = $true)]
     [System.String]
-    $DomainAdministratorUsername,
+    $VaultAddress,
 
     [System.String]
-    $DomainAdministratorVaultPath,
+    $DomainUserUsername,
+
+    [System.String]
+    $DomainUserVaultPath,
 
     [UInt64]$RetryIntervalSec = 60,
 
@@ -28,16 +32,16 @@ function Get-TargetResource
 
   )
 
-  if ($DomainUserCredential)
+  if ($DomainUserVaultPath)
   {
-    $convertToCimCredential = New-CimInstance -ClassName MSFT_Credential -Property @{
-      Username = [string]$DomainUserCredential.UserName
-      Password = [string]$null
-    } -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+  $clientToken = Start-VaultAuth -VaultAddress $VaultAddress
+  $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath
+  $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+  $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
   }
   else
   {
-    $convertToCimCredential = $null
+    $DomainUserCredential = $null
   }
     
   $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
@@ -45,7 +49,7 @@ function Get-TargetResource
    
   $returnValue = @{
     DomainName           = $domain.Name
-    DomainUserCredential = $convertToCimCredential
+    DomainUserCredential = $DomainUserCredential
     RetryIntervalSec     = $RetryIntervalSec
     RetryCount           = $RetryCount
     RebootRetryCount     = $RebootRetryCount
@@ -62,11 +66,15 @@ function Set-TargetResource
     [Parameter(Mandatory)]
     [String]$DomainName,
 
+    [parameter(Mandatory = $true)]
     [System.String]
-    $DomainAdministratorUsername,
+    $VaultAddress,
 
     [System.String]
-    $DomainAdministratorVaultPath,
+    $DomainUserUsername,
+
+    [System.String]
+    $DomainUserVaultPath,
 
     [UInt64]$RetryIntervalSec = 60,
 
@@ -77,9 +85,15 @@ function Set-TargetResource
   )
 
   $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
+
+  $clientToken = Start-VaultAuth -VaultAddress $VaultAddress
+  $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath
+  $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+  $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     
   for ($count = 0; $count -lt $RetryCount; $count++)
   {
+    
     $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
          
     if ($domain)
@@ -132,11 +146,15 @@ function Test-TargetResource
     [Parameter(Mandatory)]
     [String]$DomainName,
 
+    [parameter(Mandatory = $true)]
     [System.String]
-    $DomainAdministratorUsername,
+    $VaultAddress,
 
     [System.String]
-    $DomainAdministratorVaultPath,
+    $DomainUserUsername,
+
+    [System.String]
+    $DomainUserVaultPath,
 
     [UInt64]$RetryIntervalSec = 60,
 
@@ -147,6 +165,11 @@ function Test-TargetResource
   )
     
   $rebootLogFile = "$env:temp\xWaitForADDomain_Reboot.tmp"
+
+  $clientToken = Start-VaultAuth -VaultAddress $VaultAddress
+  $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath
+  $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
+  $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     
   $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
    

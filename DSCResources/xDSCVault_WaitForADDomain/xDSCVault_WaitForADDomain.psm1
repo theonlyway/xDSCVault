@@ -18,9 +18,11 @@ function Get-TargetResource
         [System.String]
         $VaultAddress,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $DomainUserUsername,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $DomainUserVaultPath,
 
@@ -71,9 +73,11 @@ function Set-TargetResource
         [System.String]
         $VaultAddress,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $DomainUserUsername,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $DomainUserVaultPath,
 
@@ -153,9 +157,11 @@ function Test-TargetResource
         [System.String]
         $VaultAddress,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $DomainUserUsername,
 
+        [parameter(Mandatory = $true)]
         [System.String]
         $DomainUserVaultPath,
 

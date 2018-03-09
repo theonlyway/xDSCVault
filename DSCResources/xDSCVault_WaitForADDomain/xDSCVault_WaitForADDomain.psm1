@@ -19,7 +19,7 @@ function Get-TargetResource
         $VaultAddress,
 
         [System.String]
-        $DomainAdministratorUsername,
+        $DomainUserUsername,
 
         [System.String]
         $DomainUserVaultPath,
@@ -39,7 +39,7 @@ function Get-TargetResource
         $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
         $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath -ApiPrefix $ApiPrefix
         $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
-        $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
+        $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     }
     else
     {
@@ -72,7 +72,7 @@ function Set-TargetResource
         $VaultAddress,
 
         [System.String]
-        $DomainAdministratorUsername,
+        $DomainUserUsername,
 
         [System.String]
         $DomainUserVaultPath,
@@ -93,7 +93,7 @@ function Set-TargetResource
     $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
     $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
-    $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
+    $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     
     for ($count = 0; $count -lt $RetryCount; $count++)
     {
@@ -154,7 +154,7 @@ function Test-TargetResource
         $VaultAddress,
 
         [System.String]
-        $DomainAdministratorUsername,
+        $DomainUserUsername,
 
         [System.String]
         $DomainUserVaultPath,
@@ -175,7 +175,7 @@ function Test-TargetResource
     $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
     $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainUserVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
-    $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
+    $DomainUserCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainUserUsername"), $VaultValue)
     
     $domain = Get-Domain -DomainName $DomainName -DomainUserCredential $DomainUserCredential
    

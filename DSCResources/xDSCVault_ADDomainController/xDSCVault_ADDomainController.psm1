@@ -4,7 +4,6 @@
 #
 
 $errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
 
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) `
         -ChildPath 'CommonResourceHelper.psm1')
@@ -19,7 +18,7 @@ function Get-TargetResource
         $VaultAddress,
 
         [System.String]
-        $ApiPrefix,
+        $ApiPrefix = 'v1',
 
         [Parameter(Mandatory)]
         [String]$DomainName,
@@ -110,7 +109,7 @@ function Set-TargetResource
         $VaultAddress,
 
         [System.String]
-        $ApiPrefix,
+        $ApiPrefix = 'v1',
 
         [Parameter(Mandatory)]
         [String]$DomainName,
@@ -222,7 +221,7 @@ function Test-TargetResource
         $VaultAddress,
 
         [System.String]
-        $ApiPrefix,
+        $ApiPrefix = 'v1',
 
         [Parameter(Mandatory)]
         [String]$DomainName,

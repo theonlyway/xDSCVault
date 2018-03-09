@@ -71,12 +71,27 @@ function Start-VaultAuth
         $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
         return $apiResult
     }
-    catch
+  catch
+  {
+    if ($_.Exception.Response.GetResponseStream() -ne $null) 
     {
-        "Error was $_"
-        $line = $_.InvocationInfo.ScriptLineNumber
-        "Error was in Line $line"
+      $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
+      if ($responseBody -match 'permission denied' ) 
+      {
+        Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
+      } 
+      elseif ($responseBody -match 'invalid secret_id' ) 
+      {
+        Write-Error -Message "Failed to login: Invalid secret_id"
+      } 
     }
+    else 
+    {
+      "Error was $_"
+      $line = $_.InvocationInfo.ScriptLineNumber
+      "Error was in Line $line"
+    }
+  }
 }
 
 function Write-VaultData
@@ -109,10 +124,8 @@ function Write-VaultData
 
     )
     $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
-
     $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
     $headers.Add('X-Vault-Token', $ClientToken)
-
     $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
     $body.Add('value', $Value)
 

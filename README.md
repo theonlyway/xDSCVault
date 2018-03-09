@@ -54,9 +54,9 @@ VaultUnwrap Unwrap
 ### VaultWrite
 * **[String] VaultAddress** _(Key)_: URL to the Vault
 * **[String] VaultPath** _(Required)_: Path to where the credential will be written to in the Vault
-* **[String] VaultValue** _(Required)_: Specify the value to be written
+* **[String] VaultValue** _(Key)_: Specify the value to be written
   * _Either a value must be specified or random secret must be $true_
-* **[Boolean] RandomSecret** _(Write)_: Generate a random secret
+* **[Boolean] RandomSecret** _(Required)_: Generate a random secret
   * _Either a value must be specified or random secret must be $true_
 * **[Boolean] ForceUpdate** _(Required)_: Everytime the module runs it will write the value to Vault
 ```powershell

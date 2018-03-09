@@ -41,6 +41,11 @@ List of processes that I want to get working
 
 ### VaultUnwrap
 * **VaultAddress**: URL to the Vault
+  * _Required_
+* **RoleID**: RoleID for the AppRole
+  * _Required_
+* **WrappedToken**: Wrapped token for the AppRole
+  * _Required_
 ```powershell
 VaultUnwrap Unwrap
 {
@@ -52,6 +57,15 @@ VaultUnwrap Unwrap
     
 ### VaultWrite
 * **VaultAddress**: URL to the Vault
+  * _Required_
+* **VaultPath**: Path to where the credential will be written to in the Vault
+  * _Required_
+* **VaultValue**: Specify the value to be written
+  * _Optional but either a value must be specified or random secret must be $true_
+* **RandomSecret**: Generate a random secret
+  * _Optional but either a value must be specified or random secret must be $true_
+* **ForceUpdate**: Everytime the module runs it will write the value to Vault
+  * _Required $true or $false_
 ```powershell
 VaultWrite LocalAdministratorPassword
 {
@@ -81,6 +95,7 @@ VaultLocalUser LocalAdministratorPassword
 * **DomainAdministratorUsername**: Credentials used to query for domain existence.
   * _Note: These are NOT used during domain creation._
 * **DomainAdministratorVaultPath**: Path to where the credential is located in the Vault
+  * _Note: These are NOT used during domain creation._
 
 ```powershell
 VaultADDomain FirstDS

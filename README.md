@@ -40,42 +40,47 @@ List of processes that I want to get working
 ## Resources
 
 ### VaultUnwrap
-
-    VaultUnwrap Unwrap
-    {
-      RoleId = randomroleID
-      WrappedToken = dee09a64-429b-619c-0466-9c108320105e
-      VaultAddress = https://pathtovaultserver.com   
-    } 
+* **VaultAddress**: URL to the Vault
+```powershell
+VaultUnwrap Unwrap
+{
+  RoleId = randomroleID
+  WrappedToken = dee09a64-429b-619c-0466-9c108320105e
+  VaultAddress = https://pathtovaultserver.com   
+} 
+```
     
 ### VaultWrite
-
-    VaultWrite LocalAdministratorPassword
-    {
-      VaultAddress = https://pathtovaultserver.com       
-      VaultPath = "secret/path/somevalue-administrator"
-      RandomSecret = $true
-      ForceUpdate = $false
-    } 
-
+* **VaultAddress**: URL to the Vault
+```powershell
+VaultWrite LocalAdministratorPassword
+{
+  VaultAddress = https://pathtovaultserver.com       
+  VaultPath = "secret/path/somevalue-administrator"
+  RandomSecret = $true
+  ForceUpdate = $false
+} 
+```
 ### VaultLocalUser
-
-    VaultLocalUser LocalAdministratorPassword
-    {
-      VaultAddress = https://pathtovaultserver.com       
-      VaultPath = "secret/path/somevalue-administrator"
-      Username = 'Administrator'
-      PasswordNeverExpires = $true
-      Ensure = 'Present'
-    }   
-
+* **VaultAddress**: URL to the Vault
+```powershell
+VaultLocalUser LocalAdministratorPassword
+{
+  VaultAddress = https://pathtovaultserver.com       
+  VaultPath = "secret/path/somevalue-administrator"
+  Username = 'Administrator'
+  PasswordNeverExpires = $true
+  Ensure = 'Present'
+}   
+```
 ### VaultADDomain
-
+* **VaultAddress**: URL to the Vault
 * **DomainName**: Name of the domain.
   * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
 * **ParentDomainName**: Fully qualified name of the parent domain (optional).
-* **DomainAdministratorCredential**: Credentials used to query for domain existence.
+* **DomainAdministratorUsername**: Credentials used to query for domain existence.
   * _Note: These are NOT used during domain creation._
+* **DomainAdministratorVaultPath**: Path to where the credential is located in the Vault
 
 ```powershell
 VaultADDomain FirstDS
@@ -88,29 +93,31 @@ VaultADDomain FirstDS
 }
 ```
 ### VaultWaitForADDomain
-
+* **VaultAddress**: URL to the Vault
 * **DomainName**: Name of the remote domain.
 * **RetryIntervalSec**: Interval to check for the domain's existence.
 * **RetryCount**: Maximum number of retries to check for the domain's existence.
 
 ```powershell
-    VaultWaitForADDomain DscForestWait
-    {
-      VaultAddress = https://pathtovaultserver.com       
-      DomainName = $domainName
-      DomainUserUsername = 'Administrator'
-      DomainUserVaultPath = "secret/path/somevalue-administrator"
-      RetryCount = 50
-      RetryIntervalSec = 30
-    }
+VaultWaitForADDomain DscForestWait
+{
+  VaultAddress = https://pathtovaultserver.com       
+  DomainName = $domainName
+  DomainUserUsername = 'Administrator'
+  DomainUserVaultPath = "secret/path/somevalue-administrator"
+  RetryCount = 50
+  RetryIntervalSec = 30
+}
 ```
 ### VaultADDomainController
-
-    VaultADDomainController SecondDC
-    {
-      VaultAddress = https://pathtovaultserver.com       
-      DomainName = $domainName
-      DomainAdministratorUsername = 'Administrator'
-      DomainAdministratorVaultPath = "secret/path/somevalue-administrator"
-      SafemodeAdministratorPasswordVaultPath = "secret/path/somevalue-domainsafemode"
-    }
+* **VaultAddress**: URL to the Vault
+```powershell
+VaultADDomainController SecondDC
+{
+  VaultAddress = https://pathtovaultserver.com       
+  DomainName = $domainName
+  DomainAdministratorUsername = 'Administrator'
+  DomainAdministratorVaultPath = "secret/path/somevalue-administrator"
+  SafemodeAdministratorPasswordVaultPath = "secret/path/somevalue-domainsafemode"
+}
+```

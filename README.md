@@ -140,8 +140,8 @@ VaultWaitForADDomain DscForestWait
 ### VaultADDomainController
 * **[String] VaultAddress** _(Required)_: URL to the Vault
 * **[String] DomainName** _(Key)_: The fully qualified domain name for the domain where the domain controller will be present.
-* **[String] DomainAdministratorCredential** _(Required): Specifies the credential for the account used to install the domain controller.
-* **[String] SafemodeAdministratorPassword** _(Required): Password for the administrator account when the computer is started in Safe Mode.
+* **[String] DomainAdministratorCredential** _(Required)_: Specifies the credential for the account used to install the domain controller.
+* **[String] SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
 * **[String] DatabasePath** _(Write)_: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database.
 * **[String] LogPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
 * **[String] SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.

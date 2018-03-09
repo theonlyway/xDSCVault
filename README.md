@@ -54,7 +54,7 @@ VaultUnwrap Unwrap
 ### VaultWrite
 * **[String] VaultAddress** _(Key)_: URL to the Vault
 * **[String] VaultPath** _(Required)_: Path to where the credential will be written to in the Vault
-* **[String] VaultValue** _(Key)_: Specify the value to be written
+* **[String] VaultValue** _(Write)_: Specify the value to be written
   * _Either a value must be specified or random secret must be $true_
 * **[Boolean] RandomSecret** _(Required)_: Generate a random secret
   * _Either a value must be specified or random secret must be $true_
@@ -71,7 +71,7 @@ VaultWrite LocalAdministratorPassword
 ### VaultLocalUser
 * **[String] VaultAddress** _(Required)_: URL to the Vault
 * **[String] UserName** _(Key)_: Indicates the account name for which you want to ensure a specific state.
-* **[String] VaultPath** _(Required)_: Path to where the credential will be written to in the Vault
+* **[String] VaultPath** _(Required)_: Path to where the secret will be read from the Vault
 * **[String] Description** _(Write)_: Indicates the description you want to use for the user account.
 * **[Boolean] Disabled** _(Write)_: Indicates if the account is disabled. Set this property to true to ensure that this account is disabled, and set it to false to ensure that it is enabled. The default value is false.
 * **[String] Ensure** _(Write)_: Ensures that the feature is present or absent { *Present* | Absent }.
@@ -95,11 +95,11 @@ VaultLocalUser LocalAdministratorPassword
 * **[String] DomainName** _(Key)_: Name of the domain.
   * If no parent name is specified, this is the fully qualified domain name for the first domain in the forest.
 * **[String] ParentDomainName** _(Write)_: Fully qualified name of the parent domain
-* **[String] DomainAdministratorUsername** _(Required)_: Credentials used to query for domain existence.
+* **[String] DomainAdministratorUsername** _(Required)_: Specifies the username for an account that has Domain Administrator privilages
   * _Note: These are NOT used during domain creation._
-* **[String] DomainAdministratorVaultPath** _(Required)_: Path to where the credential is located in the Vault
+* **[String] DomainAdministratorVaultPath** _(Required)_: Path to where the secret will be read from the Vault for the Domain Administrator account
   * _Note: These are NOT used during domain creation._
-* **[String] SafemodeAdministratorPasswordVaultPath** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
+* **[String] SafemodeAdministratorPasswordVaultPath** _(Required)_: Path to where the secret will be read from the Vault
 * **[String] DnsDelegationUserName** _(Write)_: Username used for creating DNS delegation.
 * **[String] DnsDelegationVaultPath** _(Write)_: Path to the secret in vault to be used for DNS delegation 
 * **[String] DomainNetBIOSName** _(Write)_: Specifies the NetBIOS name for the new domain.
@@ -122,7 +122,7 @@ VaultADDomain FirstDS
 * **[String] VaultAddress** _(Required)_: URL to the Vault
 * **[String] DomainName** _(Key)_: Name of the domain.
 * **[String] DomainUserUsername** _(Write)_: Credentials used to query for domain existence.
-* **[String] DomainUserVaultPath** _(Write)_: Path to where the credential is located in the Vault
+* **[String] DomainUserVaultPath** _(Write)_: Path to where the secret will be read from the Vault
 * **[Int] RetryIntervalSec** _(Write)_: Interval to check for the domain's existence.
 * **[Int] RetryCount** _(Write)_: Maximum number of retries to check for the domain's existence.
 
@@ -140,8 +140,9 @@ VaultWaitForADDomain DscForestWait
 ### VaultADDomainController
 * **[String] VaultAddress** _(Required)_: URL to the Vault
 * **[String] DomainName** _(Key)_: The fully qualified domain name for the domain where the domain controller will be present.
-* **[String] DomainAdministratorCredential** _(Required)_: Specifies the credential for the account used to install the domain controller.
-* **[String] SafemodeAdministratorPassword** _(Required)_: Password for the administrator account when the computer is started in Safe Mode.
+* **[String] DomainAdministratorUsername** _(Required)_: Specifies the username for the account used to install the domain controller.
+* **[String] DomainAdministratorVaultPath** _(Required)_: Path to where the secret will be read from the Vault for the Domain Administrator password
+* **[String] SafemodeAdministratorPasswordVaultPath** _(Required)_: Path to where the secret will be read from the Vault for the Safe Mode Administrator password
 * **[String] DatabasePath** _(Write)_: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database.
 * **[String] LogPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
 * **[String] SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.

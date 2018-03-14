@@ -1,5 +1,6 @@
 ConvertFrom-StringData @'
     VaultDnsException = Vault address could not be resolved
+    VaultDnsTimeout = Attempted to get HEAD from Vault URL but timed out
     VaultTokenLookupInvalid = Wrapped token has already been unwrapped, not valid or does not exist 
     IsVaulttokenwrapped = Checking to see if secret is still wrapped
     Vaulttokenisstillwrapped = Secret is still wrapped

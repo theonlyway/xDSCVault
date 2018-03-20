@@ -3,223 +3,227 @@ Set-StrictMode -Version 'Latest'
 
 function Read-RESTException
 {
-  [CmdletBinding()]
-  Param
-  (
-    # Param1 help description
-    [Parameter(Mandatory = $true,
-    Position = 0)]
-    $Exception
-  )
+    [CmdletBinding()]
+    Param
+    (
+        # Param1 help description
+        [Parameter(Mandatory = $true,
+            Position = 0)]
+        $Exception
+    )
 
-  $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList ($Exception)
-  $reader.BaseStream.Position = 0
-  $reader.DiscardBufferedData()
-  $responseBody = $reader.ReadToEnd()
-  return $responseBody
+    $reader = New-Object -TypeName System.IO.StreamReader -ArgumentList ($Exception)
+    $reader.BaseStream.Position = 0
+    $reader.DiscardBufferedData()
+    $responseBody = $reader.ReadToEnd()
+    return $responseBody
 }
 
 function Get-LocalizedData
 {
-  [CmdletBinding()]
-  param
-  (
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String]
-    $ResourceName
-  )
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ResourceName
+    )
 
-  $resourceDirectory = Join-Path -Path $PSScriptRoot -ChildPath $ResourceName
-  $localizedStringFileLocation = Join-Path -Path $resourceDirectory -ChildPath $PSUICulture
+    $resourceDirectory = Join-Path -Path $PSScriptRoot -ChildPath $ResourceName
+    $localizedStringFileLocation = Join-Path -Path $resourceDirectory -ChildPath $PSUICulture
 
-  if (-not (Test-Path -Path $localizedStringFileLocation))
-  {
-    # Fallback to en-US
-    $localizedStringFileLocation = Join-Path -Path $resourceDirectory -ChildPath 'en-US'
-  }
+    if (-not (Test-Path -Path $localizedStringFileLocation))
+    {
+        # Fallback to en-US
+        $localizedStringFileLocation = Join-Path -Path $resourceDirectory -ChildPath 'en-US'
+    }
 
-  Import-LocalizedData `
-  -BindingVariable 'localizedData' `
-  -FileName "$ResourceName.strings.psd1" `
-  -BaseDirectory $localizedStringFileLocation
+    Import-LocalizedData `
+        -BindingVariable 'localizedData' `
+        -FileName "$ResourceName.strings.psd1" `
+        -BaseDirectory $localizedStringFileLocation
 
-  return $localizedData
+    return $localizedData
 }
 
 function Start-VaultAuth
 {
-  [CmdletBinding()]
-  Param
-  (
-    [Parameter(Mandatory = $true,
-    Position = 0)]   
-    [System.String]
-    $VaultAddress,
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory = $true,
+            Position = 0)]   
+        [System.String]
+        $VaultAddress,
 
-    [System.String]
-    $ApiPrefix = 'v1',
+        [System.String]
+        $ApiPrefix = 'v1',
 
-    [System.String]
-    $AuthBackend = 'approle'
+        [System.String]
+        $AuthBackend = 'approle'
 
-  )
-  $credentials = Get-StoredCredential -Target $VaultAddress
-  $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/auth/' + $AuthBackend + '/login')
-  $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
-  $body.Add('role_id', $credentials.UserName)
-  $body.Add('secret_id', [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($credentials.Password)))
-  try
-  {
-    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
-    return $apiResult
-  }
-  catch
-  {
-    if ($_.Exception.Response.GetResponseStream() -ne $null) 
+    )
+    $credentials = Get-StoredCredential -Target $VaultAddress
+    $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/auth/' + $AuthBackend + '/login')
+    $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+    $body.Add('role_id', $credentials.UserName)
+    $body.Add('secret_id', [System.Runtime.InteropServices.marshal]::PtrToStringAuto([System.Runtime.InteropServices.marshal]::SecureStringToBSTR($credentials.Password)))
+    try
     {
-      $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
-      if ($responseBody -match 'permission denied' ) 
-      {
-        Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
-      } 
-      elseif ($responseBody -match 'invalid secret_id' ) 
-      {
-        Write-Error -Message 'Failed to login: Invalid secret_id'
-      } 
+        $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -ContentType application/json -ErrorAction Stop
+        return $apiResult
     }
-    else 
+    catch
     {
-      "Error was $_"
-      $line = $_.InvocationInfo.ScriptLineNumber
-      "Error was in Line $line"
+        if ($_.Exception.Response.GetResponseStream() -ne $null) 
+        {
+            $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
+            if ($responseBody -match 'permission denied' ) 
+            {
+                Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
+            } 
+            elseif ($responseBody -match 'invalid secret_id' ) 
+            {
+                Write-Error -Message 'Failed to login: Invalid secret_id'
+            }
+            elseif ($responseBody -match 'invalid role_id' ) 
+            {
+                Write-Error -Message 'Failed to login: Invalid role_id'
+            }        
+        }
+        else 
+        {
+            "Error was $_"
+            $line = $_.InvocationInfo.ScriptLineNumber
+            "Error was in Line $line"
+        }
     }
-  }
 }
 
 function Write-VaultData
 {
-  [CmdletBinding()]
-  Param
-  (
-    [Parameter(Mandatory = $true,
-    Position = 0)]   
-    [System.String]
-    $VaultAddress,
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory = $true,
+            Position = 0)]   
+        [System.String]
+        $VaultAddress,
 
-    [System.String]
-    $ApiPrefix = 'v1',
+        [System.String]
+        $ApiPrefix = 'v1',
 
-    [Parameter(Mandatory = $true,
-    Position = 1)]   
-    [System.String]
-    $VaultPath,
+        [Parameter(Mandatory = $true,
+            Position = 1)]   
+        [System.String]
+        $VaultPath,
 
-    [Parameter(Mandatory = $true,
-    Position = 2)]   
-    [System.String]
-    $Value,
+        [Parameter(Mandatory = $true,
+            Position = 2)]   
+        [System.String]
+        $Value,
 
-    [Parameter(Mandatory = $true,
-    Position = 3)]   
-    [System.String]
-    $ClientToken
+        [Parameter(Mandatory = $true,
+            Position = 3)]   
+        [System.String]
+        $ClientToken
 
-  )
+    )
   
-  $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
-  $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
-  $headers.Add('X-Vault-Token', $ClientToken)
-  $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
-  $body.Add('value', $Value)
+    $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
+    $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+    $headers.Add('X-Vault-Token', $ClientToken)
+    $body = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+    $body.Add('value', $Value)
 
-  try
-  {
-    Write-Verbose -Message 'Attempting to write secret'
-    $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -Headers $headers -ContentType application/json -ErrorAction Stop
-  }
-  catch
-  {
-    if ($_.Exception.Response.GetResponseStream() -ne $null) 
+    try
     {
-      $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
-      if ($responseBody -match 'permission denied' ) 
-      {
-        Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
-      } 
+        Write-Verbose -Message 'Attempting to write secret'
+        $apiResult = Invoke-RestMethod -Method Post -Uri $apiUri -Body ($body | ConvertTo-Json) -Headers $headers -ContentType application/json -ErrorAction Stop
     }
-    else 
+    catch
     {
-      "Error was $_"
-      $line = $_.InvocationInfo.ScriptLineNumber
-      "Error was in Line $line"
+        if ($_.Exception.Response.GetResponseStream() -ne $null) 
+        {
+            $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
+            if ($responseBody -match 'permission denied' ) 
+            {
+                Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
+            } 
+        }
+        else 
+        {
+            "Error was $_"
+            $line = $_.InvocationInfo.ScriptLineNumber
+            "Error was in Line $line"
+        }
     }
-  }
 }
 
 function Read-VaultData
 {
-  [CmdletBinding()]
-  Param
-  (
-    [Parameter(Mandatory = $true,
-    Position = 0)]   
-    [System.String]
-    $VaultAddress,
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory = $true,
+            Position = 0)]   
+        [System.String]
+        $VaultAddress,
 
-    [System.String]
-    $ApiPrefix = 'v1',
+        [System.String]
+        $ApiPrefix = 'v1',
 
-    [Parameter(Mandatory = $true,
-    Position = 1)]   
-    [System.String]
-    $VaultPath,
+        [Parameter(Mandatory = $true,
+            Position = 1)]   
+        [System.String]
+        $VaultPath,
 
-    [Parameter(Mandatory = $true,
-    Position = 2)]   
-    [System.String]
-    $ClientToken
+        [Parameter(Mandatory = $true,
+            Position = 2)]   
+        [System.String]
+        $ClientToken
 
-  )
-  $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
+    )
+    $apiUri = ($VaultAddress + '/' + $ApiPrefix + '/' + $VaultPath)
 
-  $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
-  $headers.Add('X-Vault-Token', $ClientToken)
+    $headers = New-Object -TypeName 'System.Collections.Generic.Dictionary[[String],[String]]'
+    $headers.Add('X-Vault-Token', $ClientToken)
 
-  try
-  {
-    $apiResult = Invoke-RestMethod -Method Get -Uri $apiUri -Headers $headers -ErrorAction Stop
-    return $apiResult
-  }
-  catch
-  {
-    if ($_.Exception.response.StatusCode.value__ -eq '404') 
+    try
     {
-      Write-Verbose -Message "Returned 404. No value found at $VaultPath"
-      $apiResult = 404
-      return $apiResult
+        $apiResult = Invoke-RestMethod -Method Get -Uri $apiUri -Headers $headers -ErrorAction Stop
+        return $apiResult
     }
-    elseif ($_.Exception.Response.GetResponseStream() -ne $null) 
+    catch
     {
-      $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
-      if ($responseBody -match 'permission denied' ) 
-      {
-        Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
-      } 
-      else 
-      {
-        "Error was $_"
-        $line = $_.InvocationInfo.ScriptLineNumber
-        "Error was in Line $line"      
-      }
+        if ($_.Exception.response.StatusCode.value__ -eq '404') 
+        {
+            Write-Verbose -Message "Returned 404. No value found at $VaultPath"
+            $apiResult = 404
+            return $apiResult
+        }
+        elseif ($_.Exception.Response.GetResponseStream() -ne $null) 
+        {
+            $responseBody = Read-RESTException -Exception $_.Exception.Response.GetResponseStream()
+            if ($responseBody -match 'permission denied' ) 
+            {
+                Write-Error -Message "Permission denied. Ensure you are using a token that has permissions to write to $VaultPath"
+            } 
+            else 
+            {
+                "Error was $_"
+                $line = $_.InvocationInfo.ScriptLineNumber
+                "Error was in Line $line"      
+            }
+        }
+        else 
+        {
+            "Error was $_"
+            $line = $_.InvocationInfo.ScriptLineNumber
+            "Error was in Line $line"
+        }
     }
-    else 
-    {
-      "Error was $_"
-      $line = $_.InvocationInfo.ScriptLineNumber
-      "Error was in Line $line"
-    }
-  }
 }
 
 <#
@@ -228,28 +232,28 @@ function Read-VaultData
 #>
 function Test-IsNanoServer
 {
-  [OutputType([Boolean])]
-  [CmdletBinding()]
-  param ()
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param ()
 
-  $isNanoServer = $false
+    $isNanoServer = $false
     
-  if (Test-CommandExists -Name 'Get-ComputerInfo')
-  {
-    $computerInfo = Get-ComputerInfo -ErrorAction 'SilentlyContinue'
-
-    if ($null -ne $computerInfo)
+    if (Test-CommandExists -Name 'Get-ComputerInfo')
     {
-      $computerIsServer = 'Server' -ieq $computerInfo.OsProductType
+        $computerInfo = Get-ComputerInfo -ErrorAction 'SilentlyContinue'
 
-      if ($computerIsServer)
-      {
-        $isNanoServer = 'NanoServer' -ieq $computerInfo.OsServerLevel
-      }
+        if ($null -ne $computerInfo)
+        {
+            $computerIsServer = 'Server' -ieq $computerInfo.OsProductType
+
+            if ($computerIsServer)
+            {
+                $isNanoServer = 'NanoServer' -ieq $computerInfo.OsServerLevel
+            }
+        }
     }
-  }
 
-  return $isNanoServer
+    return $isNanoServer
 }
 
 <#
@@ -261,17 +265,17 @@ function Test-IsNanoServer
 #>
 function Test-CommandExists
 {
-  [OutputType([Boolean])]
-  [CmdletBinding()]
-  param 
-  (
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String] $Name 
-  )
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param 
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $Name 
+    )
 
-  $command = Get-Command -Name $Name -ErrorAction 'SilentlyContinue'
-  return ($null -ne $command)
+    $command = Get-Command -Name $Name -ErrorAction 'SilentlyContinue'
+    return ($null -ne $command)
 }
 
 <#
@@ -286,29 +290,29 @@ function Test-CommandExists
 #>
 function New-InvalidArgumentException
 {
-  [CmdletBinding()]
-  param
-  (
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String]
-    $Message,
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Message,
 
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String]
-    $ArgumentName
-  )
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ArgumentName
+    )
 
-  $argumentException = New-Object -TypeName 'ArgumentException' `
-  -ArgumentList @($Message, $ArgumentName)
-  $newObjectParams = @{
-    TypeName     = 'System.Management.Automation.ErrorRecord'
-    ArgumentList = @($argumentException, $ArgumentName, 'InvalidArgument', $null)
-  }
-  $errorRecord = New-Object @newObjectParams
+    $argumentException = New-Object -TypeName 'ArgumentException' `
+        -ArgumentList @($Message, $ArgumentName)
+    $newObjectParams = @{
+        TypeName     = 'System.Management.Automation.ErrorRecord'
+        ArgumentList = @($argumentException, $ArgumentName, 'InvalidArgument', $null)
+    }
+    $errorRecord = New-Object @newObjectParams
 
-  throw $errorRecord
+    throw $errorRecord
 }
 
 <#
@@ -323,41 +327,41 @@ function New-InvalidArgumentException
 #>
 function New-InvalidOperationException
 {
-  [CmdletBinding()]
-  param
-  (
-    [ValidateNotNullOrEmpty()]
-    [String]
-    $Message,
+    [CmdletBinding()]
+    param
+    (
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Message,
 
-    [ValidateNotNull()]
-    [System.Management.Automation.ErrorRecord]
-    $errorRecord
-  )
+        [ValidateNotNull()]
+        [System.Management.Automation.ErrorRecord]
+        $errorRecord
+    )
 
-  if ($null -eq $Message)
-  {
-    $invalidOperationException = New-Object -TypeName 'InvalidOperationException'
-  }
-  elseif ($null -eq $errorRecord)
-  {
-    $invalidOperationException = New-Object -TypeName 'InvalidOperationException' `
-    -ArgumentList @($Message)
-  }
-  else
-  {
-    $invalidOperationException = New-Object -TypeName 'InvalidOperationException' `
-    -ArgumentList @($Message, $errorRecord.Exception)
-  }
+    if ($null -eq $Message)
+    {
+        $invalidOperationException = New-Object -TypeName 'InvalidOperationException'
+    }
+    elseif ($null -eq $errorRecord)
+    {
+        $invalidOperationException = New-Object -TypeName 'InvalidOperationException' `
+            -ArgumentList @($Message)
+    }
+    else
+    {
+        $invalidOperationException = New-Object -TypeName 'InvalidOperationException' `
+            -ArgumentList @($Message, $errorRecord.Exception)
+    }
 
-  $newObjectParams = @{
-    TypeName     = 'System.Management.Automation.ErrorRecord'
-    ArgumentList = @( $invalidOperationException.ToString(), 'MachineStateIncorrect', 
-    'InvalidOperation', $null )
-  }
+    $newObjectParams = @{
+        TypeName     = 'System.Management.Automation.ErrorRecord'
+        ArgumentList = @( $invalidOperationException.ToString(), 'MachineStateIncorrect', 
+            'InvalidOperation', $null )
+    }
 
-  $errorRecordToThrow = New-Object @newObjectParams
-  throw $errorRecordToThrow
+    $errorRecordToThrow = New-Object @newObjectParams
+    throw $errorRecordToThrow
 }
 
 <#
@@ -374,4 +378,4 @@ function New-InvalidOperationException
 #>
 
 Export-ModuleMember -Function @( 'Test-IsNanoServer', 'New-InvalidArgumentException', 
-'New-InvalidOperationException', 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData', 'Start-VaultAuth' )
+    'New-InvalidOperationException', 'Read-RESTException', 'Get-LocalizedData', 'Write-VaultData', 'Read-VaultData', 'Start-VaultAuth' )

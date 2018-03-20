@@ -10,4 +10,5 @@ class xDSCVault_WaitForADDomain : OMI_BaseResource
     [Write] uint64 RetryIntervalSec;
     [Write] uint32 RetryCount;
     [Write] uint32 RebootRetryCount;
+    [Write, Description("The auth backend")] String AuthBackend;
 };

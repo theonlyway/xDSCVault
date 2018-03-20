@@ -12,4 +12,5 @@ class xDSCVault_ADDomainController : OMI_BaseResource
     [write] String LogPath;
     [write] String SysvolPath;
     [write] String SiteName;
+    [Write, Description("The auth backend")] String AuthBackend;
 };

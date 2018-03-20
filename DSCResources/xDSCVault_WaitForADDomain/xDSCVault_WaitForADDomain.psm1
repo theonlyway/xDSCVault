@@ -7,7 +7,7 @@ $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) `
--ChildPath 'CommonResourceHelper.psm1')
+        -ChildPath 'CommonResourceHelper.psm1')
 
 function Get-TargetResource
 {
@@ -36,7 +36,10 @@ function Get-TargetResource
         [UInt32]$RebootRetryCount = 0,
         
         [System.String]
-        $ApiPrefix = 'v1'
+        $ApiPrefix = 'v1',
+
+        [System.String]
+        $AuthBackend = 'approle'
     )
 
     if ($DomainUserVaultPath)
@@ -91,7 +94,10 @@ function Set-TargetResource
         [UInt32]$RebootRetryCount = 0,
 
         [System.String]
-        $ApiPrefix = 'v1'
+        $ApiPrefix = 'v1',
+
+        [System.String]
+        $AuthBackend = 'approle'
 
     )
 
@@ -175,7 +181,10 @@ function Test-TargetResource
         [UInt32]$RebootRetryCount = 0,
 
         [System.String]
-        $ApiPrefix = 'v1'
+        $ApiPrefix = 'v1',
+
+        [System.String]
+        $AuthBackend = 'approle'
 
     )
     

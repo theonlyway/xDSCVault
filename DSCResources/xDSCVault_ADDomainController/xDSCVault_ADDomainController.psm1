@@ -41,7 +41,10 @@ function Get-TargetResource
 
         [String]$SysvolPath,
 
-        [String]$SiteName
+        [String]$SiteName,
+
+        [System.String]
+        $AuthBackend = 'approle'
     )
 
     $returnValue = @{
@@ -132,7 +135,10 @@ function Set-TargetResource
 
         [String]$SysvolPath,
 
-        [String]$SiteName
+        [String]$SiteName,
+
+        [System.String]
+        $AuthBackend = 'approle'
     )
 
     # Debug can pause Install-ADDSDomainController, so we remove it.
@@ -244,7 +250,10 @@ function Test-TargetResource
 
         [String]$SysvolPath,
 
-        [String]$SiteName
+        [String]$SiteName,
+
+        [System.String]
+        $AuthBackend = 'approle'
     )
 
     $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix

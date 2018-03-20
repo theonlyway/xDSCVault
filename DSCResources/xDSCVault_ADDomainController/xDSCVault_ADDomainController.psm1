@@ -52,7 +52,7 @@ function Get-TargetResource
         Ensure     = $false
     }
 
-    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix -AuthBackend $AuthBackend
     $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainAdministratorVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
     $DomainAdministratorCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
@@ -145,12 +145,12 @@ function Set-TargetResource
     $parameters = $PSBoundParameters.Remove('Debug')
     $targetResource = Get-TargetResource @PSBoundParameters
 
-    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix -AuthBackend $AuthBackend
     $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainAdministratorVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
     $DomainAdministratorCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)
 
-    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix -AuthBackend $AuthBackend
     $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $SafemodeAdministratorPasswordVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
     $SafemodeAdministratorPassword = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ('SafeModePlaceHolderUser', $VaultValue)
@@ -256,7 +256,7 @@ function Test-TargetResource
         $AuthBackend = 'approle'
     )
 
-    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix
+    $clientToken = Start-VaultAuth -VaultAddress $VaultAddress -ApiPrefix $ApiPrefix -AuthBackend $AuthBackend
     $currentVaultValue = Read-VaultData -VaultAddress $VaultAddress -ClientToken $clientToken.auth.client_token -VaultPath $DomainAdministratorVaultPath -ApiPrefix $ApiPrefix
     $VaultValue = ConvertTo-SecureString -String $currentVaultValue.data.value -AsPlainText -Force
     $DomainAdministratorCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList (("$DomainName" + '\' + "$DomainAdministratorUsername"), $VaultValue)

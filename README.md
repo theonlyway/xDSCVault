@@ -59,6 +59,8 @@ VaultUnwrap Unwrap
 * **[Boolean] RandomSecret** _(Required)_: Generate a random secret
   * _Either a value must be specified or random secret must be $true_
 * **[Boolean] ForceUpdate** _(Required)_: Everytime the module runs it will write the value to Vault
+* **[String] AuthBackend** _(Write)_: Specify an alternate approle authentication backend. if nothing is specified it will default to the default approle backend
+
 ```powershell
 VaultWrite LocalAdministratorPassword
 {
@@ -80,6 +82,8 @@ VaultWrite LocalAdministratorPassword
 * **[Boolean] PasswordChangeNotAllowed** _(Write)_: Indicates if the user can change the password. Set this property to true to ensure that the user cannot change the password, and set it to false to allow the user to change the password. The default value is false.
 * **[Boolean] PasswordChangeRequired** _(Write)_: Indicates if the user must change the password at the next sign in. Set this property to true if the user must change their password. The default value is true.
 * **[Boolean] PasswordNeverExpires** _(Write)_: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to true. The default value is false.
+* **[String] AuthBackend** _(Write)_: Specify an alternate approle authentication backend. if nothing is specified it will default to the default approle backend
+
 ```powershell
 VaultLocalUser LocalAdministratorPassword
 {
@@ -107,6 +111,7 @@ VaultLocalUser LocalAdministratorPassword
 * **[String] DatabasePath** _(Write)_: Specifies the fully qualified, non-Universal Naming Convention (UNC) path to a directory on a fixed disk of the local computer that contains the domain database.
 * **[String] LogPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
 * **[String] SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
+* **[String] AuthBackend** _(Write)_: Specify an alternate approle authentication backend. if nothing is specified it will default to the default approle backend
 
 ```powershell
 VaultADDomain FirstDS
@@ -125,6 +130,7 @@ VaultADDomain FirstDS
 * **[String] DomainUserVaultPath** _(Write)_: Path to where the secret will be read from the Vault
 * **[Int] RetryIntervalSec** _(Write)_: Interval to check for the domain's existence.
 * **[Int] RetryCount** _(Write)_: Maximum number of retries to check for the domain's existence.
+* **[String] AuthBackend** _(Write)_: Specify an alternate approle authentication backend. if nothing is specified it will default to the default approle backend
 
 ```powershell
 VaultWaitForADDomain DscForestWait
@@ -147,6 +153,8 @@ VaultWaitForADDomain DscForestWait
 * **[String] LogPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation will be written.
 * **[String] SysvolPath** _(Write)_: Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the Sysvol file will be written.
 * **[String] SiteName** _(Write)_: Specify the name of an existing site where new domain controller will be placed.
+* **[String] AuthBackend** _(Write)_: Specify an alternate approle authentication backend. if nothing is specified it will default to the default approle backend
+
 ```powershell
 VaultADDomainController SecondDC
 {

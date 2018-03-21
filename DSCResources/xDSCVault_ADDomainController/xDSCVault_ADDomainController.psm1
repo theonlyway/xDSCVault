@@ -2,6 +2,11 @@
 # xADDomainController: DSC resource to install a domain controller in Active
 # Directory.
 #
+# User name and password needed for this resource and Write-Verbose Used in helper functions
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
 
 $errorActionPreference = 'Stop'
 

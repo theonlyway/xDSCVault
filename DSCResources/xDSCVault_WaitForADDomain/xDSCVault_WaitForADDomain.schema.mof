@@ -3,7 +3,7 @@ class xDSCVault_WaitForADDomain : OMI_BaseResource
 {
     [Required, Description("Address of the Vault server")] String VaultAddress;
     [Write, Description("Version of the API to use")] String ApiPrefix;
-    [Read, Description("Complete API path")] String ApiPath;    
+    [Read, Description("Complete API path")] String ApiPath;
     [Key] String DomainName;
     [Required, Description("Domain Administrator username")] String DomainUserUsername;
     [Required, Description("Vault path to get the secret")] String DomainUserVaultPath;
@@ -11,4 +11,5 @@ class xDSCVault_WaitForADDomain : OMI_BaseResource
     [Write] uint32 RetryCount;
     [Write] uint32 RebootRetryCount;
     [Write, Description("The auth backend")] String AuthBackend;
+    [Read, Description("Domain user credentials used to query the domain")] String DomainUserCredential;
 };

@@ -3,7 +3,7 @@ class xDSCVault_ADDomainController : OMI_BaseResource
 {
     [Required, Description("Address of the Vault server")] String VaultAddress;
     [Write, Description("Version of the API to use")] String ApiPrefix;
-    [Read, Description("Complete API path")] String ApiPath;    
+    [Read, Description("Complete API path")] String ApiPath;
     [Key] String DomainName;
     [Required, Description("Vault path to get the secret")] String SafemodeAdministratorPasswordVaultPath;
     [Required, Description("Domain Administrator username")] String DomainAdministratorUsername;
@@ -13,4 +13,5 @@ class xDSCVault_ADDomainController : OMI_BaseResource
     [write] String SysvolPath;
     [write] String SiteName;
     [Write, Description("The auth backend")] String AuthBackend;
+    [Read, Description("Ensure?")] String Ensure;
 };

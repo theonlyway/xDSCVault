@@ -5,7 +5,7 @@
 #
 # Generated on: 27/02/2018
 #
-
+dsfasdf
 @{
 
     # Script module or binary module file associated with this manifest.
@@ -113,7 +113,7 @@
             ExternalModuleDependencies = 'CredentialManager'
 
         } # End of PSData hashtable
-    
+
     } # End of PrivateData hashtable
 
     # HelpInfo URI of this module
@@ -123,4 +123,3 @@
     # DefaultCommandPrefix = ''
 
 }
-
